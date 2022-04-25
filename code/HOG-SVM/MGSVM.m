@@ -1,4 +1,4 @@
-yfit1 = trainedModel.predictFcn(x_1st_valdtation);%SVM训练后导出的模型命名为trainedModel
+yfit1 = trainedModel.predictFcn(x_1st_valdtation);%The model exported after SVM training is named trainedModel
 
 count11=0;
 count12=0;

@@ -1,30 +1,30 @@
-clear all;  %%%%%%%清空工作区变量数据
+clear all;  
 
-n=24;   %调档改这个即可（n取11~15,21~25,31~35）
+n=21;   %（n：11~15,21~25,31~35）
 
-%%%%选择分割后秧盘图像的文件夹，例如此处选择一叶龄图片的文件夹，读入jpg格式的图片文件
+%%%%Select the folder of the split rice pan images, for example, select a folder of leaf-aged pictures here, and read into the jpg format picture file
 srcDir=uigetdir('Choose source directory.');
 cd(srcDir);
-allnames1=struct2cell(dir('*.jpg'));    %%%allnames1变量保存了一叶龄的所有图片的信息
+allnames1=struct2cell(dir('*.jpg'));    
 
 
-%%%%选择分割后秧盘图像的文件夹，例如此处选择二叶龄图片的文件夹，读入jpg格式的图片文件
+%%%%Select the folder of the split rice pan images, for example, select the folder of the two-leaf age picture here, and read the picture file in jpg format
 srcDir=uigetdir('Choose source directory.');
 cd(srcDir);
-allnames2=struct2cell(dir('*.jpg'));     %%%allnames2变量保存了二叶龄的所有图片的信息
+allnames2=struct2cell(dir('*.jpg'));    
 
-%%%%选择分割后秧盘图像的文件夹，例如此处选择三叶龄图片的文件夹，读入jpg格式的图片文件
+%%%%Select the folder of the split rice pan images, for example, select the folder of the three-leaf age picture here, and read the picture file in jpg format
 srcDir=uigetdir('Choose source directory.');
 cd(srcDir);
-allnames3=struct2cell(dir('*.jpg'));     %%%allnames3变量保存了三叶龄的所有图片的信息
+allnames3=struct2cell(dir('*.jpg'));    
 
 
 [m1,n1]=size(allnames1);
 for i=1:n1
     
-    aa=imread(strcat(strcat(allnames1{2,i},'\'),allnames1{1,i}));    %%%%%构建读入的文件路径，同学们可以具体点击工作区的allnames1看看里面内容，或者直接在命令行窗口打入allnames1{:,1}
+    aa=imread(strcat(strcat(allnames1{2,i},'\'),allnames1{1,i}));    
     
-    %%%%%%feature11、12、13......21、22.....31、32.....分别为不同特征属性的HOG特征
+    
     switch n
         case 11
             [feature11,hogvisualization11]=extractHOGFeatures(aa,'CellSize',[8 8],'BlockSize',[2 2]);
@@ -62,7 +62,7 @@ for i=1:n1
             [feature35,hogvisualization35]=extractHOGFeatures(aa,'CellSize',[32 32],'BlockSize',[6 6]);
     end
     
-    %%%%%%把一叶龄所有图片提取的HOG特征存放在feature**_1st变量里面，待后续SVM分类使用
+    
     switch n
         case 11
             feature_1st(i,:)=feature11;
@@ -101,12 +101,12 @@ end
 
 
 
-%%%%%%相似的处理，提取二叶龄图片的HOG特征
+
 [m2,n2]=size(allnames2);    
 for i=1:n2
-    aa=imread(strcat(strcat(allnames2{2,i},'\'),allnames2{1,i}));    %%%%%构建读入的文件路径，同学们可以具体点击工作区的allnames2看看里面内容，或者直接在命令行窗口打入allnames2{:,1}
+    aa=imread(strcat(strcat(allnames2{2,i},'\'),allnames2{1,i}));    
   
-    %%%%%%feature11、12、13......21、22.....31、32.....分别为不同特征属性的HOG特征
+   
     switch n
         case 11
             [feature11,hogvisualization11]=extractHOGFeatures(aa,'CellSize',[8 8],'BlockSize',[2 2]);
@@ -145,7 +145,7 @@ for i=1:n2
     end
    
     
-    %%%%%%把二叶龄所有图片提取的HOG特征存放在feature**_2nd变量里面，待后续SVM分类使用
+    
     switch n
         case 11
             feature_2nd(i,:)=feature11;
@@ -183,12 +183,12 @@ for i=1:n2
 end
 
 
-%%%%%%相似的处理，提取三叶龄图片的HOG特征
+
 [m3,n3]=size(allnames3);    
 for i=1:n3
-    aa=imread(strcat(strcat(allnames3{2,i},'\'),allnames3{1,i}));    %%%%%构建读入的文件路径，同学们可以具体点击工作区的allnames2看看里面内容，或者直接在命令行窗口打入allnames2{:,1}
+    aa=imread(strcat(strcat(allnames3{2,i},'\'),allnames3{1,i}));   
     
-    %%%%%%feature11、12、13......21、22.....31、32.....分别为不同特征属性的HOG特征
+    
     switch n
         case 11
             [feature11,hogvisualization11]=extractHOGFeatures(aa,'CellSize',[8 8],'BlockSize',[2 2]);
@@ -227,7 +227,7 @@ for i=1:n3
     end
    
     
-    %%%%%%把三叶龄所有图片提取的HOG特征存放在feature**_3rd变量里面，待后续SVM分类使用
+   
     switch n
         case 11
             feature_3rd(i,:)=feature11;
@@ -264,12 +264,12 @@ for i=1:n3
     end     
 end
 
-%%%%以上程序提取不同HOG特征完毕
+%%%%The above procedure is completed to extract different HOG features
 
 
-%%%%%以下程序构建SVM向量机的训练集、验证集、和测试集，以测试HOG特征的feature11为例子，其他HOG特征同样的操作原理
+%%%%%The following program builds the training set, validation set, and test set of the SVM vector machine
 
-%%%%%建立随机数序列，随机抽取图片构建训练集，n1为一叶龄图片的数量，n2为二叶龄图片的数量，n3为三叶龄图片的数量。
+
 
 RandIndex = randperm( n1 );
 x1 = feature_1st( RandIndex,: ); 
@@ -280,25 +280,25 @@ x2 = feature_2nd( RandIndex,: );
 RandIndex = randperm( n3 );
 x3 = feature_3rd( RandIndex,: );
 
-%%%%%%%x_train为训练集,   60%作为训练集
+%%%%%%%x_train is the training set and 60% is the training set
 x_train=[x1(1:floor(n1*0.6),:);x2(1:floor(n2*0.6),:);x3(1:floor(n3*0.6),:)];
 
-[width length]=size(x_train);      %%%提取训练集的行数量和列数量
+[width length]=size(x_train);      
 
-x_train(1:floor(n1*0.6),length+1)=1;        %%%%一叶龄设置分类标签为‘1’
-x_train((floor(n1*0.6)+1):(floor(n1*0.6)+1+floor(n2*0.6)),length+1)=2;     %%%%二叶龄设置分类标签为‘2’
-x_train(((floor(n1*0.6)+1+floor(n2*0.6))+1):end,length+1)=3;           %%%%三叶龄设置分类标签为‘3’
-
-
+x_train(1:floor(n1*0.6),length+1)=1;        %%%%One leaf age set the classification label to '1'
+x_train((floor(n1*0.6)+1):(floor(n1*0.6)+1+floor(n2*0.6)),length+1)=2;     %%%%Two leaf age set the classification label to ‘2’
+x_train(((floor(n1*0.6)+1+floor(n2*0.6))+1):end,length+1)=3;           %%%%Three leaf age set the classification label to ‘3’
 
 
-%%%%%以下为验证集， 20%作为验证集
+
+
+%%%%%The following is the validation set, and 20% is the validation set
 x_1st_valdtation=x1(ceil(n1*0.6):floor(n1*0.8),:);
 x_2nd_valdtation=x2(ceil(n2*0.6):floor(n2*0.8),:);
 x_3rd_valdtation=x3(ceil(n3*0.6):floor(n3*0.8),:);
 
 
-%%%%%以下为测试集， 20%作为测试集
+%%%%%The following is the test set, and 20% is the test set
 x_1st_test=x1(ceil(n1*0.8):end,:);
 x_2nd_test=x2(ceil(n2*0.8):end,:);
 x_3rd_test=x3(ceil(n3*0.8):end,:);

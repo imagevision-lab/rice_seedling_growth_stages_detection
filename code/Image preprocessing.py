@@ -2,22 +2,22 @@ import cv2
 import numpy as np
 import os
 import shutil
-from PIL import Image # 导入图像处理函数库
+from PIL import Image # Import the image processing library
 from PIL import ImageTk
 import tkinter as tk
-from tkinter import filedialog   #导入文件对话框函数库
+from tkinter import filedialog   #Import File Dialog Library
 
-# 创建窗口 设定大小并命名
+# Create a window Set the size and name it
 window = tk.Tk()
-window.title('图像预处理')
+window.title('Image preprocessing')
 window.geometry('600x500')
-global img_png           # 定义全局变量 图像的
-var = tk.StringVar()    # 这时文字变量储存器
+global img_png          
+var = tk.StringVar()   
 theLabel=tk.Label(window,text=
-"需新建1个文件夹，命名为1,存放待处理图片\n"+
-"其中文件夹‘Label region'中储存分割后图像、'Interference Terms'中为干扰项、'Data Sets'中为数据集\n"+
-"处理时请依次点击图像分割、图像剪裁、剔除干扰项\n"+
-"重复点击会覆盖之前数据")#说明语句
+"You need to create a new folder, named 1, to store the pictures to be processed\n"+
+"Its Chinese folder 'Label region' stores the segmented image, 'Interference Terms' for interference, and 'Data Sets' for datasets\n"+
+"While processing, click Segmentation, Cropping, and Culling \n"+
+"Repeated clicks overwrite previous data")#Describe the statement
 theLabel.pack()
 
 def resize(w, h, w_box, h_box, pil_image):  
@@ -30,24 +30,24 @@ def resize(w, h, w_box, h_box, pil_image):
   height = int(h*factor)  
   return pil_image.resize((width, height), Image.ANTIALIAS) 
 
-#创建文件夹 
+#Create a folder 
 def mkdir(path):
         folder = os.path.exists(path)
-        if not folder:                   #判断是否存在文件夹如果不存在则创建为文件夹
-                os.makedirs(path)        #makedirs 创建文件时如果路径不存在会创建这个路径
-                var.set("成功创建"+path)
+        if not folder:                   #Determine if a folder exists and if it does not exist, it is created as a folder
+                os.makedirs(path)        #makedirs This path is created when the file is created if it does not exist
+                var.set("Successfully created"+path)
         else:
-                var.set("已存在"+path)
+                var.set("Already exists"+path)
 
-#创建文件夹Data Sets,Label region,Interference Terms功能
+#Create folders for Data Sets, Label region, Interference Terms feature
 def creat_Img():
-        file = "Data Sets"#创建路径
-        mkdir(file)#调用函数
+        file = "Data Sets"
+        mkdir(file)
         file = "Label region"
         mkdir(file)
         file = "Interference Terms"
         mkdir(file)
-#创建图像分割功能
+#Create an image segmentation function
 def region_Img():
     global img_png
     walk()
@@ -62,25 +62,25 @@ def region_Img():
     window1.geometry('600x500')
     label_Img = tk.Label(window1, image=img_png,width=w_box, height=h_box)  
     label_Img.pack()
-    theLabel1=tk.Label(window1,text="分割后部分结果显示如上")
+    theLabel1=tk.Label(window1,text="After the split, the partial result is displayed as above")
     theLabel1.place(x=220,y=400)
-    var.set('已分割')
-    ########图像分割
+    var.set('Split')
+    ########Image segmentation
 def get_image(path):
-    #获取图片
+    #Gets the picture
     img=cv2.imread(path)
     gray=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         
     return img, gray
         
 def Gaussian_Blur(gray):
-    # 高斯去噪
+ 
     blurred = cv2.GaussianBlur(gray, (9, 9),0)
         
     return blurred
     
 def Sobel_gradient(blurred):
-    # 索比尔算子来计算x、y方向梯度
+ 
     gradX = cv2.Sobel(blurred, ddepth=cv2.CV_32F, dx=1, dy=0)
     gradY = cv2.Sobel(blurred, ddepth=cv2.CV_32F, dx=0, dy=1)
         
@@ -97,9 +97,9 @@ def Thresh_and_blur(gradient):
     return thresh
         
 def image_morphology(thresh):
-    # 建立一个椭圆核函数
+   
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (25, 25))
-    # 执行图像形态学
+  
     closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
     closed = cv2.erode(closed, None, iterations=4)
     closed = cv2.dilate(closed, None, iterations=4)
@@ -107,7 +107,7 @@ def image_morphology(thresh):
     return closed
         
 def findcnts_and_box_point(closed):
-    # 这里opencv3返回的是三个参数
+  
     (cnts, _) = cv2.findContours(closed.copy(), 
         cv2.RETR_LIST, 
         cv2.CHAIN_APPROX_SIMPLE)
@@ -135,7 +135,7 @@ def drawcnts_and_cut(original_img, box):
     return draw_img, crop_img
         
 def walk():
-#重命名图片
+
     path = '1/'
     count = 1
     for file in os.listdir(path):
@@ -144,12 +144,12 @@ def walk():
     
     a=1
     b=1
-    path = '1/'  #图片存放文件夹
+    path = '1/' 
     cont=(len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]))
-    #获取文件夹中所有图片数量
+   
     while a<=cont:
-        img_path = r'1/'+str(a)+'n.jpg'#读取文件夹"4"中图片
-        save_path = r'Label region/'+str(b)+'n.jpg'#分割后图片保存至文件夹"Label region"中
+        img_path = r'1/'+str(a)+'n.jpg'
+        save_path = r'Label region/'+str(b)+'n.jpg'#After splitting, the image is saved to the folder "Label region"
         original_img, gray = get_image(img_path)
         blurred = Gaussian_Blur(gray)
         gradX, gradY, gradient = Sobel_gradient(blurred)
@@ -158,7 +158,7 @@ def walk():
         box = findcnts_and_box_point(closed)
         draw_img, crop_img = drawcnts_and_cut(original_img,box)
         
-        # 显示
+        # display
        
         cv2.waitKey(0)
         cv2.imwrite(save_path, crop_img)
@@ -169,7 +169,7 @@ def printInfo(accountE1,accountE2):
         p1 = accountE1.get()
         p2 = accountE2.get()
         return p1,p2
-# 创建剪裁图像函数
+# Creates a Crop Image function
 def crop_Img():
         global img_png
         def printInfo():
@@ -178,18 +178,18 @@ def crop_Img():
                 window3.destroy()
                 p1=int(a1)
                 p2=int(a2)
-                path = 'Label region/'  #图片存放文件夹
+                path = 'Label region/'  
                 con=(len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]))
-                #获取文件夹中所有图片数量
+                
                 k=1
                 n=1
                 while k<=con:
                     x=0
                     y=0
-                    p=224           #定义剪裁图片的大小
+                    p=224           
                     u=p1
                     t=p2
-                    img = cv2.imread('Label region/'+str(k)+'n.jpg')  #读取文件夹“3”中所有图片
+                    img = cv2.imread('Label region/'+str(k)+'n.jpg')  
                     size=img.shape
                     a=size[0]
                     b=size[1]
@@ -198,7 +198,7 @@ def crop_Img():
                             img1=img[x:u,y:t]
                             u=u+p1
                             x=x+p1
-                            cv2.imwrite('Data Sets/'+str(n)+'n.jpg',img1)#保存剪裁后图片至文件夹“1”
+                            cv2.imwrite('Data Sets/'+str(n)+'n.jpg',img1)#Save the cropped picture to folder "1"
                             n+=1
                         y=y+p2
                         t=t+p2
@@ -207,10 +207,10 @@ def crop_Img():
                     k+=1
                     cv2.waitKey(0)
                     cv2.destroyAllWindows()   #cv2.destroyWindow(wname)
-                var.set('已剪裁')
+                var.set('Cropped')
         window3 = tk.Tk()
         window3.geometry('160x70')
-        accountL1 = tk.Label(window3, text="pixels=")  # pixels标签
+        accountL1 = tk.Label(window3, text="pixels=")  # pixels
         accountL1.place(x=2,y=3)
         accountE1 = tk.Entry(window3,width=5)
         accountE2 = tk.Entry(window3,width=5)
@@ -221,12 +221,12 @@ def crop_Img():
         accountL2.place(x=92,y=3)
         #p1=accountE1.get()
         #p2=accountE2.get()
-        loginBtn = tk.Button(window3, text="确定", width=5, height=1,command= printInfo)
+        loginBtn = tk.Button(window3, text="OK", width=5, height=1,command= printInfo)
         loginBtn.place(x=30,y=30)
-        quitBtn = tk.Button(window3, text="取消", width=5, height=1,command=window3.destroy)
+        quitBtn = tk.Button(window3, text="exit", width=5, height=1,command=window3.destroy)
         quitBtn.place(x=90,y=30)
     
-# 创建剔除干扰项函数    
+# Create a knockout function    
 def remove_Img():
     global img_png
     global img_png1
@@ -236,26 +236,26 @@ def remove_Img():
     p=1
     path = 'Data Sets/'
     num=(len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]))
-    #获取文件夹中所有图片数量
+    
     while p<=num:
         path = 'Data Sets/'+str(p)+'n.jpg'
-        img1 = Image.open('Data Sets/'+str(p)+'n.jpg')#读取剪裁后的图片
-        img2=img1.convert('RGB')   #8位图片转换成24位图片
-        width = img2.size[0]#长度
-        height = img2.size[1]#宽度
+        img1 = Image.open('Data Sets/'+str(p)+'n.jpg')
+        img2=img1.convert('RGB')   
+        width = img2.size[0]
+        height = img2.size[1]
         ii2=1
         jj2=1
-        for i in range(0,width):#遍历所有长度的点
-            for j in range(0,height):#遍历所有宽度的点
-                data = (img2.getpixel((i,j)))#打印该图片的所有点
+        for i in range(0,width):
+            for j in range(0,height):
+                data = (img2.getpixel((i,j)))
                 dd1=data[0]
                 dd2=data[1]
                 dd3=data[2]
                 ii2+=1
-                if (115>=dd1>=0 and 255>=dd2>=60 and 115>=dd3>=0):  #绿色的区域取值，根据不同需求，这里的数值可以变化，主要用于设置色彩范围
+                if (115>=dd1>=0 and 255>=dd2>=60 and 115>=dd3>=0):  
                     data2 = (img2.getpixel((i,j)))
                     jj2+=1
-        img2 = img2.convert("RGB")#把图片强制转成RGB
+        img2 = img2.convert("RGB")
         red_data2 = jj2/ii2   
 
         if red_data2>0.005:
@@ -263,22 +263,22 @@ def remove_Img():
         else:
             red_data_ok2 = 0
             
-        if red_data_ok2 < 0.5:    #绿色占比小于50%剔除
-            if os.path.exists(path):  # 如果文件存在
-                shutil.move(path, 'Interference Terms/'+str(p)+'n.jpg')  #干扰项放在文件夹“Interference Terms”
+        if red_data_ok2 < 0.5:    #Green is less than 50% culling
+            if os.path.exists(path): 
+                shutil.move(path, 'Interference Terms/'+str(p)+'n.jpg')  #Interference items are placed in the folder "Interference Terms"
             else:
-                print('no such file:%s'%my_file)  # 则返回文件不存在
+                print('no such file:%s'%my_file)  
         p+=1
-        #print("绿色占比",red_data_ok2)
+        #print("green",red_data_ok2)
 
-    ######重命名归一化图片
+    ######Rename the normalized picture
     path = 'Data Sets/'
     count = 1
     for file in os.listdir(path):
         os.rename(os.path.join(path,file),os.path.join(path,str(count)+".jpg"))
         count+=1
 
-    ######重命名干扰项图片
+    ######Rename the distractor picture
     path = 'Interference Terms/'
     count = 1
     for file in os.listdir(path):
@@ -309,46 +309,46 @@ def remove_Img():
     label_Img2.place(x=300,y=100)
     label_Img3.place(x=150,y=300)
     label_Img4.place(x=300,y=300)
-    theLabel2=tk.Label(window2,text="数据集部分结果显示如上")
-    theLabel3=tk.Label(window2,text="干扰项部分结果显示如上")
+    theLabel2=tk.Label(window2,text="The dataset section results are shown above")
+    theLabel3=tk.Label(window2,text="The results of the interference section are shown above")
     theLabel2.place(x=220,y=210)
     theLabel3.place(x=220,y=410)
-    var.set('已剔除')   # 设置标签的文字为 '已剔除'
+    var.set('Culled')   
 
 
     
 
-# 创建文本窗口，显示当前操作状态
+
 Label_Show = tk.Label(window,
-    textvariable=var,   # 使用 textvariable 替换 text, 因为这个可以变化
+    textvariable=var,  
     bg='white', font=('Arial', 12), width=20, height=2)
 Label_Show.pack()
 
-#创建新建文件夹按钮
+
 btn_creat = tk.Button(window,
-    text='新建文件夹',      # 显示在按钮上的文字
+    text='Create a folder',      
     width=15, height=2,
-    command=creat_Img)     # 点击按钮式执行的命令
+    command=creat_Img)     
 btn_creat.place(x=30,y=130)
-#创建图像分割按钮
+
 btn_region = tk.Button(window,
-    text='图像分割',      # 显示在按钮上的文字
+    text='Segmentation',      
     width=15, height=2,
-    command=region_Img)     # 点击按钮式执行的命令
+    command=region_Img)     
 btn_region.place(x=170,y=130)
-# 创建剪裁图像按钮
+
 btn_crop = tk.Button(window,
-    text='剪裁图像',      # 显示在按钮上的文字
+    text='Crop',      
     width=15, height=2,
-    command=crop_Img,)     # 点击按钮式执行的命令
-btn_crop.place(x=310,y=130)    # 按钮位置
-# 创建剔除干扰项按钮
+    command=crop_Img,)     
+btn_crop.place(x=310,y=130)    
+
 btn_remove = tk.Button(window,
-    text='剔除干扰项',      # 显示在按钮上的文字
+    text='Culling',      
     width=15, height=2,
-    command=remove_Img)     # 点击按钮式执行的命令
-btn_remove.place(x=450,y=130)    # 按钮位置
+    command=remove_Img)     
+btn_remove.place(x=450,y=130)    
 
 
-# 运行整体窗口
+# Run the overall window
 window.mainloop()
